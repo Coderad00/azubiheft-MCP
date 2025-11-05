@@ -1,86 +1,91 @@
-# Azubiheft Web API Wrapper
+# Azubiheft.de MCP Server
 
-[![Downloads](https://static.pepy.tech/badge/azubiheftapi)](https://pepy.tech/project/azubiheftapi)
-[![Downloads](https://static.pepy.tech/badge/azubiheftapi/month)](https://pepy.tech/project/azubiheftapi)
-[![Downloads](https://static.pepy.tech/badge/azubiheftapi/week)](https://pepy.tech/project/azubiheftapi)
+MCP (Model Context Protocol) Server for Azubiheft.de integration with Claude Desktop and Cursor.
 
-This library provides a Python wrapper for "azubiheft.de"
-With this library, developers can easily manage their Ausbildung (training) reports through a script, allowing for enhanced automation and better control over their Ausbildung documentation.
+## 📋 Prerequisites
 
-## 📖 About Azubiheft
+- macOS
+- Go 1.21 or higher
+- Claude Desktop App or Cursor IDE
 
-Azubiheft brings a streamlined online approach to training documentation. Designed for businesses, instructors, and apprentices, it offers an effortless way to manage every training entry online. With Azubiheft, you're always one step ahead with all your training data right at your fingertips.
+## 🚀 Installation (macOS)
 
-## 🛠 Installation
+### 1. Compile Server
 
 ```bash
-pip install azubiheftApi
+make build
 ```
 
-## 🔍 Usage
+This creates the binary at `bin/azubiheft-mcp-server`.
 
-Here's a quick guide on how to use the `azubiheftApi`:
+### 2. Configure Claude Desktop / Cursor
 
-```python
-from azubiheftApi import azubiheftApi
-from datetime import datetime
+Edit the config file:
 
-# Initialize session
-azubiheft = azubiheftApi.Session()
-
-# Login
-azubiheft.login("yourUserName", "yourPassword")
-
-# Check login status
-print(azubiheft.isLoggedIn())
-
-# Get available subjects
-subjects = azubiheft.getSubjects()
-print(subjects)
-
-# Add a new subject
-azubiheft.add_subject("New Subject")
-
-# Delete an existing subject by ID
-azubiheft.delete_subject("subjectId")
-
-# Fetch a report by date
-report = azubiheft.getReport(datetime(2023, 10, 19))
-print(report)
-
-
-# Get a week's report ID
-week_id = azubiheft.getReportWeekId(datetime.now())
-print(week_id)
-
-# Write a new report entry
-azubiheft.writeReport(datetime(2023, 10, 19), "Hello World", "2:00", 1)
-# its also possible to format the text using \n or just like this
-# """
-# Hello World
-# This is a new line
-# """
-
-# Fetch the report again to see changes
-report = azubiheft.getReport(datetime(2023, 10, 19), include_formatting=True)  #  include_formatting=True to include formatting
-print(report)
-
-
-# delete a report entry
-azubiheft.deleteReport(datetime(2023, 10, 19))
-
-
-# Log out from the session
-azubiheft.logout()
-
-# Check login status (should be False after logging out)
-print(azubiheft.isLoggedIn())
-
-
+**Claude Desktop:**
+```bash
+open ~/Library/Application\ Support/Claude/claude_desktop_config.json
 ```
 
-## 🌱 Contribution
+**Cursor:**
+```bash
+open ~/.cursor/mcp.json
+```
 
-Feel free to fork, star, or contribute to this repository. For any bugs or feature requests, please open a new issue.
+Add the following configuration:
 
----
+```json
+{
+  "mcpServers": {
+    "azubiheft": {
+      "command": "/Users/konrad.maedler/GolandProjects/Azubiheft.deMCP/azubiheft-api/bin/azubiheft-mcp-server",
+      "args": [],
+      "env": {
+        "AZUBIHEFT_USERNAME": "your_username@email.de",
+        "AZUBIHEFT_PASSWORD": "your_password"
+      }
+    }
+  }
+}
+```
+
+**Important:** Adjust the `command` path to match your actual installation path!
+
+### 3. Restart Application
+
+Quit the application completely (Cmd+Q) and restart it.
+
+## 📚 Usage
+
+After restart, you can use commands like:
+
+- `"Show me my subjects at Azubiheft"`
+- `"Create a report for today: Subject Company, 8 hours, Web development"`
+- `"Show me the report from 2025-01-15"`
+- `"Delete all reports from 2025-11-04"`
+
+## 🔧 Development
+
+### Project Structure
+
+```
+.
+├── cmd/server/          # Main entry point
+├── internal/
+│   ├── azubiheft/       # Azubiheft.de API Client
+│   ├── mcp/            # MCP Server implementation
+│   └── server/         # Service layer (tool implementations)
+├── bin/                # Compiled binary
+└── Makefile           # Build commands
+```
+
+### Build Commands
+
+```bash
+make build    # Compile the server
+make clean    # Delete the binary
+```
+
+## 📄 License
+
+See [LICENSE](LICENSE) file.
